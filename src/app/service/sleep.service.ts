@@ -12,7 +12,6 @@ export class SleepService {
 
   constructor(private http: Http) {
     this.headers = new Headers({
-      'Content-Type': 'application/json',
       'Accept': 'application/json'
     });
     this.options = new RequestOptions({ headers: this.headers, withCredentials: true });
@@ -28,30 +27,34 @@ export class SleepService {
   }
 
   post(uts: number): Promise<Sleep> {
+    let body = new URLSearchParams();
+    body.set('uts', Math.floor(uts/1000).toString())
+
     return this.http
-      .post(this.APIadress, { uts: uts }, this.options)
+      .post(this.APIadress, body, this.options)
       .toPromise()
       .then(this.extractSleep)
       .catch(this.handleError)
   }
 
-  delete(): Promise<any> {
+  delete(): Promise<string> {
     return this.http
       .delete(this.APIadress, this.options)
       .toPromise()
+      .then(res => {
+        return res.json().Message
+      }).catch(this.handleError)
   }
 
   private extractSleep(res: Response): Sleep {
     let body = res.json();
-    console.log(body);
-    if (body.NbrItem === 0) {
+    if (body.Found === false) {
       return null
     }
-    let item = body.Data[0];
-    return new Sleep(item.ID, item.Uts)
+    return new Sleep(body.Sleep.Uts*1000)
   }
 
-  private handleError(error: any): Promise<Sleep> {
+  private handleError(error: any): Promise<any> {
     console.error('An error occurred', error);
     return Promise.reject(error.message || error);
   }

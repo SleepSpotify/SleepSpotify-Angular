@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Http } from '@angular/http';
-import { Location } from '@angular/common';
+import { Location, NgSwitch } from '@angular/common';
 
-import { Observable, Subscription } from 'rxjs/Rx';
+import { SimpleTimer } from 'ng2-simple-timer';
 
 import { SleepService } from '../service/sleep.service';
 import { AccountService } from '../service/account.service'
@@ -19,49 +19,97 @@ import { Countdown } from '../model/countdown'
 })
 export class TimerComponent implements OnInit {
   private sleep: Sleep;
-  private timeleft: Countdown;
-  private started: boolean;
-  private o: Observable<number>
+  private timerID: string;
+  private sleepService: SleepService;
+  timeleft: Countdown;
+  state = 0;
 
-  constructor(private http: Http, private location: Location) {
-    this.o = Observable.timer(1000, 1000);
-  }
+  constructor(
+    private http: Http,
+    private location: Location,
+    private st: SimpleTimer
+  ) { }
 
   ngOnInit(): void {
     let accountService = new AccountService(this.http);
-    let sleepService = new SleepService(this.http);
+    this.sleepService = new SleepService(this.http);
 
-
-    accountService.isConnected().then(account=>{
-      if (!account.IsConnected){
+    accountService.isConnected().then(account => {
+      if (!account.IsConnected) {
         window.location.href = 'http://localhost:8000/login'
         return;
       }
 
-      sleepService.get().then(sleep => {
-        if (sleep === null){
-          console.log('hit');
+      this.st.newTimer('countdown', 1);
+
+      this.sleepService.get().then(sleep => {
+        if (sleep === null) {
+          this.state = 1;
+          this.sleep = null;
+          this.timeleft = new Countdown(0, 0, 0)
           return;
         }
         this.sleep = sleep;
-        this.startTimerFromSleep()
+        this.timeleft = this.sleep.getCountDown();
+        this.timerID = this.st.subscribe('countdown', () => this.updateCountdown());
+        this.state = 2;
       });
-
-    });
-  }
-
-  startTimerFromSleep(): void {
-    this.timeleft = this.sleep.getCountDown();
-    console.log(this.timeleft);
-    this.o.subscribe(this.updateCountdown);
-  }
-
-  startTimerFromCountdown(): void {
-
+    }).catch(e =>
+      alert(e)
+      );
   }
 
   updateCountdown(): void {
-    this.timeleft.updateCountdown();
-    console.log(this.timeleft);
+    this.timeleft = this.sleep.getCountDown()
+    if (this.timeleft.isFinsish()) {
+      this.state = 4;
+      this.st.unsubscribe(this.timerID);
+      this.timeleft = new Countdown(0, 0, 0);
+    }
+  }
+
+  countdownPause(): void {
+    // DELETE SLEEP
+    this.sleepService.delete().then(message => {
+      this.st.unsubscribe(this.timerID);
+      this.state = 3;
+    }).catch(message => {
+      alert(message);
+    });
+  }
+
+  countdownReset(): void {
+    //DELETE SLEEP
+    if (this.timeleft.isFinsish()) {
+      this.state = 1;
+      return
+    }
+    this.sleepService.delete().then(message => {
+      this.st.unsubscribe(this.timerID)
+      this.sleep = null;
+      this.timeleft = new Countdown(0, 0, 0);
+      this.state = 1;
+    })
+  }
+
+  countdownStart(): void {
+    // POST SLEEP
+
+    this.sleepService.post(this.timeleft.getDistance()).then(sleep => {
+      this.sleep = sleep;
+      this.timeleft = this.sleep.getCountDown();
+      this.timerID = this.st.subscribe('countdown', () => this.updateCountdown());
+      this.state = 2
+    });
+  }
+
+  countdownResume(): void {
+    //POST SLEEP
+    this.sleepService.post(this.timeleft.getDistance()).then(sleep => {
+      this.sleep = sleep;
+      this.timeleft = this.sleep.getCountDown();
+      this.timerID = this.st.subscribe('countdown', () => this.updateCountdown());
+      this.state = 2
+    });
   }
 }

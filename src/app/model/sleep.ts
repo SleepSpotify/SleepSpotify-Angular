@@ -1,12 +1,10 @@
 import { Countdown } from './countdown'
 
 export class Sleep{
-  ID: number;
   Uts: number;
 
-  constructor(ID: number, Uts: number) {
+  constructor(Uts: any) {
     this.Uts = Uts;
-    this.ID = ID;
   }
 
   getDate(): Date {
@@ -14,6 +12,10 @@ export class Sleep{
   }
 
   getCountDown(): Countdown{
-    return new Countdown(new Date().getTime() - this.Uts);
+    let distance = new Date().getTime() - this.Uts;
+    let hour = (-Math.floor(distance / (1000 * 60 * 60)))-1;
+    let min = (-Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)))-1;
+    let sec = (-Math.floor((distance % (1000 * 60)) / 1000));
+    return new Countdown(hour, min, sec);
   }
 }

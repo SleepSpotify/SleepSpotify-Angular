@@ -1,25 +1,26 @@
+import { Input } from '@angular/core'
+
 export class Countdown {
 
   distance: number;
 
-  hour: number;
-  min: number;
-  sec: number;
+  @Input() hour: number;
+  @Input() min: number;
+  @Input() sec: number;
 
-  constructor(distance: number) {
-    this.distance = distance + 1000;
+  constructor(hour: number, min: number, sec: number) {
+    this.hour = hour;
+    this.min = min;
+    this.sec = sec;
   }
 
-  getDate(): Date {
-    return new Date(new Date().getTime() + this.distance);
+  getDistance(): number {
+    return new Date(
+      new Date().getTime() + this.sec * 1000 + this.min * 1000 * 60 + this.hour * 1000 * 60 * 60
+    ).getTime()
   }
 
-  updateCountdown(): void {
-
-        this.distance -= 1000;
-
-        this.hour = Math.floor(this.distance / (1000 * 60 * 60));
-        this.min = Math.floor((this.distance % (1000 * 60 * 60)) / (1000 * 60));
-        this.sec = Math.floor((this.distance % (1000 * 60)) / 1000);
+  isFinsish(): boolean {
+    return this.hour <= 0 && this.min <= 0 && this.sec <= 0;
   }
 }

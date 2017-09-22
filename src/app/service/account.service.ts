@@ -3,7 +3,7 @@ import { Http } from '@angular/http'
 
 import 'rxjs/add/operator/toPromise';
 
-import { Account } from '../model/account'
+import { JSONConnected } from '../model/return.api'
 
 @Injectable()
 export class AccountService {
@@ -12,13 +12,15 @@ export class AccountService {
 
   constructor(private http: Http){ }
 
-  isConnected(): Promise<Account>{
+  isConnected(): Promise<JSONConnected>{
     return this.http
       .get(this.APIadress, { withCredentials: true })
       .toPromise()
-      .then(r => {
-        return new Account(r.json());
+      .then(json => {
+        return new JSONConnected(json.json());
       })
-      .catch(r => {return false});
+      .catch(json => {
+        return Promise.reject(json.json().message)
+      });
   }
 }
