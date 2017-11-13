@@ -1,0 +1,37 @@
+<h2>Timer</h2>
+
+<div *ngIf="state === 0">
+  LOADING ...
+</div>
+<div *ngIf="state === 1">
+  <input type="number" [(ngModel)]="timeleft.hour" min="0">
+  <input type="number" [(ngModel)]="timeleft.min" min="0" max="59">
+  <input type="number" [(ngModel)]="timeleft.sec" min="0" max="59">
+  <button type="button" class="btn btn-secondary" (click)="countdownStart()">Start</button>
+</div>
+<div *ngIf="state === 2">
+  <span [innerHtml]="timeleft.hour"></span>:
+  <span [innerHtml]="timeleft.min"></span>:
+  <span [innerHtml]="timeleft.sec"></span>
+  <div class="btn-group" role="group" aria-label="control button">
+    <button type="button" class="btn btn-secondary" (click)="countdownPause()">Pause</button>
+    <button type="button" class="btn btn-secondary" (click)="countdownReset()">Reset</button>
+  </div>
+</div>
+<div *ngIf="state === 3">
+  <span [innerHtml]="timeleft.hour"></span>:
+  <span [innerHtml]="timeleft.min"></span>:
+  <span [innerHtml]="timeleft.sec"></span>
+  <div class="btn-group" role="group" aria-label="control button">
+    <button type="button" class="btn btn-secondary" (click)="countdownResume()">Resume</button>
+    <button type="button" class="btn btn-secondary" (click)="countdownReset()">Reset</button>
+  </div>
+</div>
+<div *ngIf="state === 4">
+  <span [innerHtml]="timeleft.hour"></span>:
+  <span [innerHtml]="timeleft.min"></span>:
+  <span [innerHtml]="timeleft.sec"></span>
+  <div class="btn-group" role="group" aria-label="control button">
+    <button type="button" class="btn btn-secondary" (click)="countdownReset()">Reset</button>
+  </div>
+</div>
