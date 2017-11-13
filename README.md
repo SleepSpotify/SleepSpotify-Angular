@@ -1,4 +1,4 @@
-# SleepSpotifyAngular
+# SleepSpotifyAngular v0.1
 
 this project allow you to pause Spotify at the end of a timer
 this is the front-end part of the project
